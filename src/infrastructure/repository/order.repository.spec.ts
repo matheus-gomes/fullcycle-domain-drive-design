@@ -1,6 +1,4 @@
 import { Sequelize } from "sequelize-typescript";
-import fs from "fs";
-import path from "path";
 import Customer from "../../domain/entity/customer";
 import CustomerModel from "../db/sequelize/model/customer.model";
 import CustomerRepository from "./customer.repository";
@@ -18,14 +16,11 @@ describe("Order repository test", () => {
 
     let sequelize: Sequelize;
 
-    beforeAll(() => {
-        fs.unlink(path.join(process.cwd(), ":memory"), () => { });
-    });
 
     beforeEach(async () => {
         sequelize = new Sequelize({
             dialect: 'sqlite',
-            storage: ':memory',
+            storage: ':memory:',
             logging: false,
             sync: { force: true },
         });

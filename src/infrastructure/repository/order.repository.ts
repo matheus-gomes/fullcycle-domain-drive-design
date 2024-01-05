@@ -34,54 +34,28 @@ export default class OrderRepository implements OrderRepositoryInterface {
             },
         );
 
+        await OrderItemModel.destroy({
+            where: {
+                order_id: entity.id,
+            }
+        })
+
         await orderModel.update({
             id: entity.id,
             customer_id: entity.customerId,
             total: entity.total(),
         });
 
-        const itemIdsToDelete = orderModel.items
-            .filter(
-                (item) => !entity.items.some((it) => it.id === item.id)
-            ).map(
-                (item) => item.id
-            );
-        
-        await OrderItemModel.destroy({
-            where: {
-                id: { [Op.in]: itemIdsToDelete }
-            }
-        });
+        const itemsToAdd = entity.items.map((item) => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            product_id: item.productId,
+            quantity: item.quantity,
+            order_id: entity.id,
+        }));
 
-        const orderItemsUpdates = entity.items.map((item) => {
-            if (orderModel.items.some(it => item.id === it.id)) {
-                return OrderItemModel.update(
-                    {
-                        name: item.name,
-                        price: item.price,
-                        product_id: item.productId,
-                        quantity: item.quantity,
-                        order_id: entity.id,
-                    },
-                    {
-                        where: {
-                            id: item.id
-                        }
-                    }
-                );
-            }
-
-            return OrderItemModel.create({
-                id: item.id,
-                name: item.name,
-                price: item.price,
-                product_id: item.productId,
-                quantity: item.quantity,
-                order_id: entity.id,
-            });
-        })
-
-        await Promise.all(orderItemsUpdates);
+        await OrderItemModel.bulkCreate(itemsToAdd);
     }
 
     async find(id: string): Promise<Order> {

@@ -1,6 +1,4 @@
 import { Sequelize } from "sequelize-typescript";
-import fs from "fs";
-import path from "path";
 import ProductModel from "../db/sequelize/model/product.model";
 import Product from "../../domain/entity/product";
 import ProductRepository from "./product.repository";
@@ -8,10 +6,6 @@ import ProductRepository from "./product.repository";
 describe("Product repository test", () => {
 
     let sequelize: Sequelize;
-
-    beforeAll(() => {
-        fs.unlink(path.join(process.cwd(), ":memory"), () => { });
-    });
 
     beforeEach(async () => {
         sequelize = new Sequelize({
